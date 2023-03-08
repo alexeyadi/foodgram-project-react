@@ -38,6 +38,7 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
+    '''Model of ingredient.'''
     name = models.CharField(
         'Название',
         max_length=200
@@ -141,6 +142,59 @@ class Favorite(models.Model):
                 fields=['user', 'recipe'],
                 name='unique_favorite'
             )
+        ]
+
+    def __str__(self):
+        return f'{self.user.username} - {self.recipe.name}'
+
+
+class IngredientRecipe(models.Model):
+    '''Model for link Ingredient and Recipe'''
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
+                               related_name='recipe_ingredients',
+                               verbose_name='Рецепт')
+    ingredient = models.ForeignKey(Ingredient,
+                                   on_delete=models.CASCADE,
+                                   related_name='recipe_ingredients',
+                                   verbose_name='Ингредиент')
+    amount = models.IntegerField(
+        validators=[
+            MinValueValidator(1, 'Количество не менее 1.'),
+        ],
+        verbose_name='Количество'
+    )
+
+    class Meta:
+        verbose_name = 'Ингредиент в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецепте'
+
+    def __str__(self):
+        return f'{self.recipe.name}: {self.ingredient.name} - {self.amount} '
+
+
+class ShoppingList(models.Model):
+    '''Model for shopping list'''
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='shopping_user',
+        verbose_name='Пользователь',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='shopping_recipe',
+        verbose_name='Рецепт',
+    )
+
+    class Meta:
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_list')
         ]
 
     def __str__(self):
