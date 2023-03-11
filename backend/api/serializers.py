@@ -198,7 +198,7 @@ class RecipeCreateSerializer(RecipeSerializer):
         return instance
 
 
-class MiniRecipeSerializer(RecipeSerializer):
+class ShortRecipeSerializer(RecipeSerializer):
     '''Serializer to work with MiniRecipe.'''
     class Meta:
         model = Recipe
@@ -207,7 +207,7 @@ class MiniRecipeSerializer(RecipeSerializer):
 
 class SubscriptionSerializer(CustomUserSerializer):
     '''Serializer to work with Subscription model.'''
-    recipes = MiniRecipeSerializer(read_only=True, many=True)
+    recipes = ShortRecipeSerializer(read_only=True, many=True)
     recipes_count = IntegerField(source='recipes.count', read_only=True)
 
     class Meta:
