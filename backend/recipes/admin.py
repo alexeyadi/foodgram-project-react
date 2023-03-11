@@ -1,23 +1,23 @@
-from django.contrib import admin
+from django.contrib.admin import register, ModelAdmin
 from django.contrib.admin import display
 
 from .models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                      ShoppingList, Tag)
 
 
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
+@register(Tag)
+class TagAdmin(ModelAdmin):
     list_display = ('name', 'color', 'slug',)
 
 
-@admin.register(Ingredient)
-class IngredientAdmin(admin.ModelAdmin):
+@register(Ingredient)
+class IngredientAdmin(ModelAdmin):
     list_display = ('name', 'measurement_unit',)
     list_filter = ('name',)
 
 
-@admin.register(Recipe)
-class RecipeAdmin(admin.ModelAdmin):
+@register(Recipe)
+class RecipeAdmin(ModelAdmin):
     list_display = ('name', 'id', 'author', 'count_favorites')
     readonly_fields = ('count_in_favorites',)
     list_filter = ('author', 'name', 'tags',)
@@ -27,16 +27,16 @@ class RecipeAdmin(admin.ModelAdmin):
         return obj.favorites.count()
 
 
-@admin.register(Favorite)
-class FavoriteAdmin(admin.ModelAdmin):
+@register(Favorite)
+class FavoriteAdmin(ModelAdmin):
     list_display = ('user', 'recipe',)
 
 
-@admin.register(IngredientRecipe)
-class IngredientRecipe(admin.ModelAdmin):
+@register(IngredientRecipe)
+class IngredientRecipe(ModelAdmin):
     list_display = ('recipe', 'ingredient', 'amount',)
 
 
-@admin.register(ShoppingList)
-class ShoppingListAdmin(admin.ModelAdmin):
+@register(ShoppingList)
+class ShoppingListAdmin(ModelAdmin):
     list_display = ('user', 'recipe',)

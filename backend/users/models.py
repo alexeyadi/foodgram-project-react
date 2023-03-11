@@ -1,21 +1,23 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db.models import (Model, EmailField, CharField, ForeignKey,
+                              CASCADE, UniqueConstraint
+                              )
 
 
 class User(AbstractUser):
     '''Custom user model.'''
-    email = models.EmailField(
+    email = EmailField(
         'Email',
         max_length=254,
         unique=True,
     )
 
-    first_name = models.CharField(
+    first_name = CharField(
         'Имя',
         max_length=150,
     )
 
-    last_name = models.CharField(
+    last_name = CharField(
         'Фамилия',
         max_length=150,
     )
@@ -29,17 +31,17 @@ class User(AbstractUser):
         return self.username
 
 
-class Subscription(models.Model):
+class Subscription(Model):
     '''Subscription to author.'''
-    user = models.ForeignKey(
+    user = ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=CASCADE,
         related_name='follower',
         verbose_name='Подписчик',
     )
-    author = models.ForeignKey(
+    author = ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=CASCADE,
         related_name='following',
         verbose_name='Автор',
     )
@@ -48,7 +50,7 @@ class Subscription(models.Model):
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         constraints = [
-            models.UniqueConstraint(
+            UniqueConstraint(
                 fields=['user', 'author'],
                 name='unique_subscription'
             )

@@ -1,9 +1,9 @@
-from django.contrib import admin
+from django.contrib.admin import ModelAdmin, site
 
 from users.models import Subscription, User
 
 
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(ModelAdmin):
     list_display = ('pk',
                     'username',
                     'email',
@@ -17,7 +17,7 @@ class UserAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-class SubscriptionAdmin(admin.ModelAdmin):
+class SubscriptionAdmin(ModelAdmin):
     list_display = ('pk',
                     'user',
                     'author',
@@ -26,5 +26,5 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_filter = ('user', 'author')
 
 
-admin.site.register(User, UserAdmin)
-admin.site.register(Subscription, SubscriptionAdmin)
+site.register(User, UserAdmin)
+site.register(Subscription, SubscriptionAdmin)
