@@ -46,7 +46,7 @@ git clone git@github.com:alexeyadi/foodgram-project-react.git
 ```
 
 ```
-cd api_yamdb
+cd foodgram-project-react
 ```
 
 Cоздать и активировать виртуальное окружение:
