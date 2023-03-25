@@ -42,9 +42,6 @@ class SubscriptionsViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(author)
 
         if self.request.method == 'POST':
-            if user == author:
-                raise serializers.ValidationError(
-                    'Нельзя подписаться на самого себя!')
             post_for_actions(user, author, Subscription)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 

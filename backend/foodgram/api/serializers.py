@@ -1,5 +1,6 @@
 import base64
 
+from django.db import transaction
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
@@ -26,17 +27,17 @@ class CustomUserSerializer(UserSerializer):
     '''Serializer to work with custom User model.'''
     is_subscribed = SerializerMethodField()
 
-    class Meta:
-        model = User
-        fields = ('email', 'id', 'username', 'first_name', 'last_name',
-                  'is_subscribed')
-
     def get_is_subscribed(self, obj):
         if self.context['request'].user.is_authenticated:
             user = get_object_or_404(
                 User, username=self.context['request'].user)
             return user.follower.filter(author=obj.id).exists()
         return False
+
+    class Meta:
+        model = User
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'is_subscribed')
 
 
 class IngredientSerializer(ModelSerializer):
@@ -101,12 +102,6 @@ class RecipeSerializer(ModelSerializer):
     is_favorited = SerializerMethodField()
     is_in_shopping_list = SerializerMethodField()
 
-    class Meta:
-        model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shopping_list', 'name', 'image', 'text',
-                  'cooking_time')
-
     def get_is_favorited(self, obj):
         if self.context['request'].user.is_authenticated:
             user = get_object_or_404(
@@ -121,35 +116,23 @@ class RecipeSerializer(ModelSerializer):
             return user.list.filter(recipe=obj.id).exists()
         return False
 
+    class Meta:
+        model = Recipe
+        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
+                  'is_in_shopping_list', 'name', 'image', 'text',
+                  'cooking_time')
+
 
 class RecipeCreateSerializer(RecipeSerializer):
     '''Serializer for create recipe.'''
     tags = PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
 
-    class Meta:
-        model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shopping_cart', 'name', 'image', 'text',
-                  'cooking_time')
-        extra_kwargs = {
-            'cooking_time': {
-                'min_value': None,
-            },
-        }
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Recipe.objects.all(),
-                fields=('author', 'name'),
-                message='Название должно быть уникальным.'
-            )
-        ]
-
     @staticmethod
-    def save_ingredients(recipe, ingredients):
+    def _save_ingredients(recipe, ingredients):
         ingredients_list = []
         for ingredient in ingredients:
-            current_ingredient = ingredient['ingredient']['id']
-            current_amount = ingredient['amount']
+            current_ingredient = ingredient.get('id')
+            current_amount = ingredient.get('amount')
             ingredients_list.append(
                 IngredientRecipe(
                     recipe=recipe,
@@ -164,38 +147,58 @@ class RecipeCreateSerializer(RecipeSerializer):
 
         ingredients_list = []
         for ingredient in data['recipe_ingredients']:
-            if ingredient['amount'] <= 0:
+            if ingredient.get('amount') <= 0:
                 raise ValidationError('Количество не может быть меньше 1.')
-            ingredients_list.append(ingredient['ingredient']['id'])
+            ingredients_list.append(ingredient.get('id'))
 
         if len(ingredients_list) > len(set(ingredients_list)):
             raise ValidationError('Ингредиенты должны быть уникальны.')
         return data
 
+    @transaction.atomic
     def create(self, validated_data):
         author = self.context['request'].user
-        ingredients = validated_data.pop('recipe_ingredients')
-        tags = validated_data.pop('tags')
+        ingredients = validated_data.get('recipe_ingredients', [])
+        tags = validated_data.get('tags', [])
         recipe = Recipe.objects.create(**validated_data, author=author)
-        recipe.tags.add(*tags)
+        recipe.tags.set(tags)
         self.save_ingredients(recipe, ingredients)
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
         instance.image = validated_data.get('image', instance.image)
         instance.cooking_time = validated_data.get(
             'cooking_time', instance.cooking_time)
-        ingredients = validated_data.pop('recipe_ingredients')
-        tags = validated_data.pop('tags')
+        ingredients = validated_data.get('recipe_ingredients', [])
+        tags = validated_data.get('tags', [])
         instance.tags.clear()
-        instance.tags.add(*tags)
+        instance.tags.set(tags)
         instance.ingredients.clear()
         recipe = instance
         self.save_ingredients(recipe, ingredients)
         instance.save()
         return instance
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
+                  'is_in_shopping_cart', 'name', 'image', 'text',
+                  'cooking_time')
+        extra_kwargs = {
+            'cooking_time': {
+                'min_value': 1,
+            },
+        }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Recipe.objects.all(),
+                fields=('author', 'name'),
+                message='Название должно быть уникальным.'
+            )
+        ]
 
 
 class ShortRecipeSerializer(RecipeSerializer):
@@ -209,6 +212,13 @@ class SubscriptionSerializer(CustomUserSerializer):
     '''Serializer to work with Subscription model.'''
     recipes = ShortRecipeSerializer(read_only=True, many=True)
     recipes_count = IntegerField(source='recipes.count', read_only=True)
+
+    def validate(self, data):
+        user = self.context['request'].user
+        author = self.instance
+        if user == author:
+            raise ValidationError('Нельзя подписаться на самого себя!')
+        return data
 
     class Meta:
         model = User

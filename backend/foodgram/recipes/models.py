@@ -1,7 +1,8 @@
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db.models import (Model, CharField, SlugField, ForeignKey, CASCADE,
                               ImageField, TextField, ManyToManyField,
-                              IntegerField, DateTimeField, UniqueConstraint)
+                              IntegerField, DateTimeField, UniqueConstraint,
+                              PositiveSmallIntegerField)
 from users.models import User
 
 
@@ -9,7 +10,13 @@ class Tag(Model):
     '''Model for recipes tags.'''
     name = CharField(
         'Название',
-        max_length=200
+        max_length=200,
+        validators=[
+            RegexValidator(
+                '^[a-zA-Z0-9_-]+$',
+                message='Разрешены буквы, цифры, тире и знаки подчеркивания.'
+            )
+        ]
     )
     color = CharField(
         'Цвет в HEX',
@@ -95,7 +102,7 @@ class Recipe(Model):
         related_name='recipes',
     )
 
-    cooking_time = IntegerField(
+    cooking_time = PositiveSmallIntegerField(
         validators=[
             MinValueValidator(1, 'Время приготовления не менее минуты.'),
         ],

@@ -8,6 +8,10 @@ class IsAuthorOrAdminOrReadOnly(permissions.BasePermission):
                 or request.method in permissions.SAFE_METHODS
                 or request.user.is_superuser)
 
+    def has_permission(self, request, view):
+        return (request.method in permissions.SAFE_METHODS
+                or request.user.is_authenticated)
+
 
 class IsAdminOrReadOnly(permissions.BasePermission):
     '''Check your status. You have access if you are Admin. Or only read.'''
