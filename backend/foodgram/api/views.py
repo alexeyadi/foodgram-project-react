@@ -119,10 +119,9 @@ class ShoppingListViewSet(viewsets.GenericViewSet):
 
         if self.request.method == 'POST':
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        elif self.request.method == 'DELETE':
+        if self.request.method == 'DELETE':
             return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False,
             methods=['get', ],

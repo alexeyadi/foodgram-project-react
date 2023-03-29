@@ -9,11 +9,9 @@ def get_list_txt(ingredients):
     '''Function to generate txt file for shopping list.'''
     content_list = []
     for ingredient in ingredients:
-        content_list.append(
-                            f"{ingredient['ingredient__name']} "
+        content_list.append(f"{ingredient['ingredient__name']} "
                             f"({ingredient['ingredient__measurement_unit']}): "
-                            f"{ingredient['total_amount']}"
-                            )
+                            f"{ingredient['total_amount']}")
     content = 'Список покупок:\n\n' + '\n'.join(content_list)
     filename = 'shopping_list.txt'
     file = HttpResponse(content, content_type='text/plain')
