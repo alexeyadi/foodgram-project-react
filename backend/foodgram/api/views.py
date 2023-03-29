@@ -1,7 +1,7 @@
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, serializers, status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -15,6 +15,7 @@ from api.utils import delete_for_actions, get_list_txt, post_for_actions
 from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                             ShoppingList, Tag)
 from users.models import Subscription, User
+from rest_framework.generics import GenericAPIView
 
 
 class SubscriptionsViewSet(viewsets.GenericViewSet):
@@ -114,18 +115,17 @@ class ShoppingListViewSet(viewsets.GenericViewSet):
             methods=['post', 'delete'],
             permission_classes=[IsAuthorOrAdminOrReadOnly, ])
     def shopping_list(self, request, pk):
-        user = self.request.user
         recipe = get_object_or_404(Recipe, pk=pk)
         serializer = self.get_serializer(recipe)
+        serializer.context['recipe'] = recipe
+        serializer.is_valid(raise_exception=True)
 
         if self.request.method == 'POST':
-            post_for_actions(user, recipe, ShoppingList)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if self.request.method == 'DELETE':
-            delete_for_actions(user, recipe, ShoppingList)
+        elif self.request.method == 'DELETE':
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False,
             methods=['get', ],
