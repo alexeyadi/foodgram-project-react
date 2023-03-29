@@ -1,8 +1,8 @@
 from django.core.validators import MinValueValidator, RegexValidator
-from django.db.models import (Model, CharField, SlugField, ForeignKey, CASCADE,
-                              ImageField, TextField, ManyToManyField,
-                              IntegerField, DateTimeField, UniqueConstraint,
-                              PositiveSmallIntegerField)
+from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
+                              ImageField, IntegerField, ManyToManyField, Model,
+                              PositiveSmallIntegerField, SlugField, TextField,
+                              UniqueConstraint)
 from users.models import User
 
 
