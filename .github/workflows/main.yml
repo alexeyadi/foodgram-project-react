@@ -48,7 +48,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: diablik666/foodgram_frontend
+          tags: megulya/foodgram_frontend:latest
           file: frontend/Dockerfile
   
   deploy:
