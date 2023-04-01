@@ -126,15 +126,15 @@ sudo docker-compose up -d --build
 - После успешной сборки выполнить следующие действия (только при первом деплое):
     * провести миграции внутри контейнеров:
     ```bash
-    docker-compose exec web python manage.py migrate
+    docker-compose exec backend python manage.py migrate
     ```
     * собрать статику проекта:
     ```bash
-    docker-compose exec web python manage.py collectstatic --no-input
+    docker-compose exec backend python manage.py collectstatic --no-input
     ```  
     * Создать суперпользователя Django, после запроса от терминала ввести логин и пароль для суперпользователя:
     ```bash
-    docker-compose exec web python manage.py createsuperuser
+    docker-compose exec backend python manage.py createsuperuser
     ```
 ## Проверка работы сервера
 Проверить работу сервера можно по IP: 158.160.28.232
@@ -142,7 +142,7 @@ sudo docker-compose up -d --build
 ### Команды для заполнения базы данных
 Создать дамп базы данных:
 ```
-sudo docker-compose exec web python manage.py dumpdata > fixtures.json
+sudo docker-compose exec backend python manage.py dumpdata > fixtures.json
 ```
 **Далее команды по востановлению базы данных из резервной копии.**
 Узнаем CONTAINER ID для контейнера:
