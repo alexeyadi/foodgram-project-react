@@ -19,6 +19,11 @@ services:
     depends_on:
       - db
 
+  frontend:
+    image: megulya/foodgram_frontend:latest
+    volumes:
+      - ../frontend/:/app/result_build/
+
   nginx:
     image: nginx:1.21.3-alpine
     ports:
