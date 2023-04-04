@@ -113,7 +113,7 @@ class RecipeSerializer(ModelSerializer):
         if self.context['request'].user.is_authenticated:
             user = get_object_or_404(
                 User, username=self.context['request'].user)
-            return user.list.filter(recipe=obj.id).exists()
+            return user.cart.filter(recipe=obj.id).exists()
         return False
 
     class Meta:
