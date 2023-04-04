@@ -19,10 +19,12 @@ class RecipeFilter(FilterSet):
         user = self.request.user
         if value == 1:
             return queryset.filter(favorite__user=user)
-        return Recipe.objects.all()
+        # return Recipe.objects.all()
+        return queryset
 
     def get_is_in_shopping_list(self, queryset, name, value):
         user = self.request.user
         if value == 1:
             return queryset.filter(cart__user=user)
-        return Recipe.objects.all()
+        # return Recipe.objects.all()
+        return queryset
