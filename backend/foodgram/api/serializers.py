@@ -1,6 +1,6 @@
 import base64
 
-from api.utils import ShoppingList, delete_for_actions, post_for_actions
+# from api.utils import ShoppingList, delete_for_actions, post_for_actions
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.shortcuts import get_object_or_404
