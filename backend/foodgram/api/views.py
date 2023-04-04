@@ -135,7 +135,7 @@ class FavoriteViewSet(viewsets.GenericViewSet):
 #                 total_amount=Sum('amount'))
 #         return get_list_txt(ingredients)
 
-class ShoppingCartViewSet(viewsets.GenericViewSet):
+class ShoppingListViewSet(viewsets.GenericViewSet):
     """Viewset for user shopping cart."""
     serializer_class = ShortRecipeSerializer
     queryset = Recipe.objects.all()
