@@ -13,18 +13,16 @@ class RecipeFilter(FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ('author', )
+        fields = ('author', 'tags', 'is_favorited', 'is_in_shopping_list', )
 
     def get_is_favorited(self, queryset, name, value):
         user = self.request.user
         if value == 1:
             return queryset.filter(favorite__user=user)
-        # return Recipe.objects.all()
-        return queryset
+        return Recipe.objects.all()
 
     def get_is_in_shopping_list(self, queryset, name, value):
         user = self.request.user
         if value == 1:
             return queryset.filter(cart__user=user)
-        # return Recipe.objects.all()
-        return queryset
+        return Recipe.objects.all()
