@@ -1,6 +1,11 @@
 # Дипломный проект Foodgram
 ![status workflow](https://github.com/alexeyadi/foodgram-project-react/actions/workflows/yamdb_workflow.yml/badge.svg)
 
+## Проверка работы сервера
+IP: 158.160.28.232
+Логин: admin
+Пароль: admin
+
 ## Стек технологий используемый в проекте:
 * Python - 3.7
 
