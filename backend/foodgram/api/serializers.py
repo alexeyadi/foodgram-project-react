@@ -185,7 +185,7 @@ class RecipeCreateSerializer(RecipeSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shopping_cart', 'name', 'image', 'text',
+                  'is_in_shopping_list', 'name', 'image', 'text',
                   'cooking_time')
         extra_kwargs = {
             'cooking_time': {
