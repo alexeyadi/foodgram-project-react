@@ -204,16 +204,16 @@ class RecipeCreateSerializer(RecipeSerializer):
 class ShortRecipeSerializer(RecipeSerializer):
     '''Serializer to work with ShortRecipe.'''
 
-    def validate(self, attrs):
-        request = self.context.get('request')
-        method = self.context.get('view').method
-        user = request.user
-        recipe = self.context.get('recipe')
-        if method == 'POST':
-            post_for_actions(user, recipe, ShoppingList)
-        if method == 'DELETE':
-            delete_for_actions(user, recipe, ShoppingList)
-        return super().validate(attrs)
+    # def validate(self, attrs):
+    #     request = self.context.get('request')
+    #     method = self.context.get('view').method
+    #     user = request.user
+    #     recipe = self.context.get('recipe')
+    #     if method == 'POST':
+    #         post_for_actions(user, recipe, ShoppingList)
+    #     if method == 'DELETE':
+    #         delete_for_actions(user, recipe, ShoppingList)
+    #     return super().validate(attrs)
 
     class Meta:
         model = Recipe
