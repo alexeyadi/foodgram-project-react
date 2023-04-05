@@ -3,12 +3,12 @@ from api.permissions import IsAuthorOrAdminOrReadOnly
 from api.serializers import (IngredientSerializer, RecipeCreateSerializer,
                              RecipeSerializer, ShortRecipeSerializer,
                              SubscriptionSerializer, TagSerializer)
-from api.utils import delete_for_actions, get_list_txt, post_for_actions
+from api.utils import delete_for_actions, get_cart_txt, post_for_actions
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
-                            ShoppingList, Tag)
+                            ShoppingCart, Tag)
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -105,22 +105,24 @@ class FavoriteViewSet(viewsets.GenericViewSet):
 
 
 # class ShoppingListViewSet(viewsets.GenericViewSet):
-#     '''Viewset for shopping list.'''
+#     """Viewset for user shopping cart."""
 #     serializer_class = ShortRecipeSerializer
 #     queryset = Recipe.objects.all()
 
 #     @action(detail=True,
 #             methods=['post', 'delete'],
 #             permission_classes=[IsAuthorOrAdminOrReadOnly, ])
-#     def shopping_list(self, request, pk):
+#     def shopping_cart(self, request, pk):
+#         user = self.request.user
 #         recipe = get_object_or_404(Recipe, pk=pk)
 #         serializer = self.get_serializer(recipe)
-#         serializer.context['recipe'] = recipe
-#         serializer.is_valid(raise_exception=True)
 
 #         if self.request.method == 'POST':
+#             post_for_actions(user, recipe, ShoppingList)
 #             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 #         if self.request.method == 'DELETE':
+#             delete_for_actions(user, recipe, ShoppingList)
 #             return Response(status=status.HTTP_204_NO_CONTENT)
 #         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -128,14 +130,15 @@ class FavoriteViewSet(viewsets.GenericViewSet):
 #             methods=['get', ],
 #             permission_classes=[IsAuthenticated, ],
 #             )
-#     def download_shopping_list(self, request):
+#     def download_shopping_cart(self, request):
 #         ingredients = IngredientRecipe.objects.filter(
-#             recipe__list__user=request.user).values(
+#             recipe__cart__user=request.user).values(
 #             'ingredient__name', 'ingredient__measurement_unit').annotate(
 #                 total_amount=Sum('amount'))
 #         return get_list_txt(ingredients)
 
-class ShoppingListViewSet(viewsets.GenericViewSet):
+
+class ShoppingCartViewSet(viewsets.GenericViewSet):
     """Viewset for user shopping cart."""
     serializer_class = ShortRecipeSerializer
     queryset = Recipe.objects.all()
@@ -149,11 +152,11 @@ class ShoppingListViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(recipe)
 
         if self.request.method == 'POST':
-            post_for_actions(user, recipe, ShoppingList)
+            post_for_actions(user, recipe, ShoppingCart)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if self.request.method == 'DELETE':
-            delete_for_actions(user, recipe, ShoppingList)
+            delete_for_actions(user, recipe, ShoppingCart)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -166,4 +169,4 @@ class ShoppingListViewSet(viewsets.GenericViewSet):
             recipe__cart__user=request.user).values(
             'ingredient__name', 'ingredient__measurement_unit').annotate(
                 total_amount=Sum('amount'))
-        return get_list_txt(ingredients)
+        return get_cart_txt(ingredients)

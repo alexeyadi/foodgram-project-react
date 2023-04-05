@@ -182,7 +182,7 @@ class IngredientRecipe(Model):
         return f'{self.recipe.name}: {self.ingredient.name} - {self.amount}'
 
 
-class ShoppingList(Model):
+class ShoppingCart(Model):
     '''Model for shopping list'''
     user = ForeignKey(
         User,
@@ -203,8 +203,30 @@ class ShoppingList(Model):
         constraints = [
             UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='unique_list')
+                name='unique_user_cart_recipe')
         ]
+
+        # user = ForeignKey(
+    #     User,
+    #     on_delete=CASCADE,
+    #     related_name='cart',
+    #     verbose_name='Пользователь',
+    # )
+    # recipe = ForeignKey(
+    #     Recipe,
+    #     on_delete=CASCADE,
+    #     related_name='cart',
+    #     verbose_name='Рецепт',
+    # )
+
+    # class Meta:
+    #     verbose_name = 'Список покупок'
+    #     verbose_name_plural = 'Списки покупок'
+    #     constraints = [
+    #         UniqueConstraint(
+    #             fields=['user', 'recipe'],
+    #             name='unique_list')
+    #     ]
 
     def __str__(self):
         return f'{self.user.username} - {self.recipe.name}'

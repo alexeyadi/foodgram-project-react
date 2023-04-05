@@ -1,6 +1,5 @@
 import base64
 
-# from api.utils import ShoppingList, delete_for_actions, post_for_actions
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -100,7 +99,7 @@ class RecipeSerializer(ModelSerializer):
                                   default=CurrentUserDefault())
     image = Base64ImageField()
     is_favorited = SerializerMethodField()
-    is_in_shopping_list = SerializerMethodField()
+    is_in_shopping_cart = SerializerMethodField()
 
     def get_is_favorited(self, obj):
         if self.context['request'].user.is_authenticated:
@@ -109,7 +108,7 @@ class RecipeSerializer(ModelSerializer):
             return user.favorite.filter(recipe=obj.id).exists()
         return False
 
-    def get_is_in_shopping_list(self, obj):
+    def get_is_in_shopping_cart(self, obj):
         if self.context['request'].user.is_authenticated:
             user = get_object_or_404(
                 User, username=self.context['request'].user)
@@ -119,7 +118,7 @@ class RecipeSerializer(ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shopping_list', 'name', 'image', 'text',
+                  'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
 
 
@@ -185,7 +184,7 @@ class RecipeCreateSerializer(RecipeSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shopping_list', 'name', 'image', 'text',
+                  'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
         extra_kwargs = {
             'cooking_time': {
@@ -203,17 +202,6 @@ class RecipeCreateSerializer(RecipeSerializer):
 
 class ShortRecipeSerializer(RecipeSerializer):
     '''Serializer to work with ShortRecipe.'''
-
-    # def validate(self, attrs):
-    #     request = self.context.get('request')
-    #     method = self.context.get('view').method
-    #     user = request.user
-    #     recipe = self.context.get('recipe')
-    #     if method == 'POST':
-    #         post_for_actions(user, recipe, ShoppingList)
-    #     if method == 'DELETE':
-    #         delete_for_actions(user, recipe, ShoppingList)
-    #     return super().validate(attrs)
 
     class Meta:
         model = Recipe
