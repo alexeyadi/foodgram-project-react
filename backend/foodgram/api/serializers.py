@@ -43,7 +43,7 @@ class IngredientSerializer(ModelSerializer):
     '''Serializer to work with Ingredient model.'''
     class Meta:
         model = Ingredient
-        fields = ('name', 'measurement_unit')
+        fields = '__all__'
         validators = [
             UniqueTogetherValidator(
                 queryset=Ingredient.objects.all(),
