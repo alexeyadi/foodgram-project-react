@@ -104,40 +104,6 @@ class FavoriteViewSet(viewsets.GenericViewSet):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-# class ShoppingListViewSet(viewsets.GenericViewSet):
-#     """Viewset for user shopping cart."""
-#     serializer_class = ShortRecipeSerializer
-#     queryset = Recipe.objects.all()
-
-#     @action(detail=True,
-#             methods=['post', 'delete'],
-#             permission_classes=[IsAuthorOrAdminOrReadOnly, ])
-#     def shopping_cart(self, request, pk):
-#         user = self.request.user
-#         recipe = get_object_or_404(Recipe, pk=pk)
-#         serializer = self.get_serializer(recipe)
-
-#         if self.request.method == 'POST':
-#             post_for_actions(user, recipe, ShoppingList)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-#         if self.request.method == 'DELETE':
-#             delete_for_actions(user, recipe, ShoppingList)
-#             return Response(status=status.HTTP_204_NO_CONTENT)
-#         return Response(status=status.HTTP_400_BAD_REQUEST)
-
-#     @action(detail=False,
-#             methods=['get', ],
-#             permission_classes=[IsAuthenticated, ],
-#             )
-#     def download_shopping_cart(self, request):
-#         ingredients = IngredientRecipe.objects.filter(
-#             recipe__cart__user=request.user).values(
-#             'ingredient__name', 'ingredient__measurement_unit').annotate(
-#                 total_amount=Sum('amount'))
-#         return get_list_txt(ingredients)
-
-
 class ShoppingCartViewSet(viewsets.GenericViewSet):
     """Viewset for user shopping cart."""
     serializer_class = ShortRecipeSerializer

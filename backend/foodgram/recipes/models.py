@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator  # RegexValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
                               ImageField, IntegerField, ManyToManyField, Model,
                               PositiveSmallIntegerField, SlugField, TextField,
@@ -11,23 +11,23 @@ class Tag(Model):
     name = CharField(
         'Название',
         max_length=200,
-        # validators=[
-        #     RegexValidator(
-        #         '^[a-zA-Z0-9_-]+$',
-        #         message='Разрешены буквы, цифры, тире и знаки подчеркивания.'
-        #     )
-        # ]
+        validators=[
+            RegexValidator(
+                '^[a-zA-Z0-9_-]+$',
+                message='Разрешены буквы, цифры, тире и знаки подчеркивания.'
+            )
+        ]
     )
     color = CharField(
         'Цвет в HEX',
         max_length=7,
         null=True,
-        # validators=[
-        #     RegexValidator(
-        #         '^#([a-fA-F0-9]{6})',
-        #         message='Введите HEX-код цвета.'
-        #     )
-        # ]
+        validators=[
+            RegexValidator(
+                '^#([a-fA-F0-9]{6})',
+                message='Введите HEX-код цвета.'
+            )
+        ]
 
     )
     slug = SlugField(
@@ -149,7 +149,7 @@ class Favorite(Model):
         constraints = [
             UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='unique_favorite'
+                name='unique_user_fav_recipe'
             )
         ]
 

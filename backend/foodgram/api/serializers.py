@@ -122,16 +122,111 @@ class RecipeSerializer(ModelSerializer):
                   'cooking_time')
 
 
+# class RecipeCreateSerializer(RecipeSerializer):
+#     '''Serializer for create recipe.'''
+#     tags = PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
+
+#     @staticmethod
+#     def _save_ingredients(recipe, ingredients):
+#         ingredients_list = []
+#         for ingredient in ingredients:
+#             current_ingredient = ingredient.get('id')
+#             current_amount = ingredient.get('amount')
+#             ingredients_list.append(
+#                 IngredientRecipe(
+#                     recipe=recipe,
+#                     ingredient=current_ingredient,
+#                     amount=current_amount))
+#         IngredientRecipe.objects.bulk_create(ingredients_list)
+
+#     def validate(self, data):
+#         if data['cooking_time'] <= 0:
+#             raise ValidationError('Время приготовления не может '
+#                                   'быть менее 1 минуты.')
+
+#         ingredients_list = []
+#         for ingredient in data['recipe_ingredients']:
+#             if ingredient.get('amount') <= 0:
+#                 raise ValidationError('Количество не может быть меньше 1.')
+#             ingredients_list.append(ingredient.get('id'))
+
+#         if len(ingredients_list) > len(set(ingredients_list)):
+#             raise ValidationError('Ингредиенты должны быть уникальны.')
+#         return data
+
+#     @transaction.atomic
+#     def create(self, validated_data):
+#         author = self.context['request'].user
+#         ingredients = validated_data.get('recipe_ingredients', [])
+#         tags = validated_data.get('tags', [])
+#         recipe = Recipe.objects.create(**validated_data, author=author)
+#         recipe.tags.set(tags)
+#         self.save_ingredients(recipe, ingredients)
+#         return recipe
+
+#     @transaction.atomic
+#     def update(self, instance, validated_data):
+#         instance.name = validated_data.get('name', instance.name)
+#         instance.text = validated_data.get('text', instance.text)
+#         instance.image = validated_data.get('image', instance.image)
+#         instance.cooking_time = validated_data.get(
+#             'cooking_time', instance.cooking_time)
+#         ingredients = validated_data.get('recipe_ingredients', [])
+#         tags = validated_data.get('tags', [])
+#         instance.tags.clear()
+#         instance.tags.set(tags)
+#         instance.ingredients.clear()
+#         recipe = instance
+#         self.save_ingredients(recipe, ingredients)
+#         instance.save()
+#         return instance
+
+#     class Meta:
+#         model = Recipe
+#         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
+#                   'is_in_shopping_cart', 'name', 'image', 'text',
+#                   'cooking_time')
+#         extra_kwargs = {
+#             'cooking_time': {
+#                 'min_value': 1,
+#             },
+#         }
+#         validators = [
+#             UniqueTogetherValidator(
+#                 queryset=Recipe.objects.all(),
+#                 fields=('author', 'name'),
+#                 message='Название должно быть уникальным.'
+#             )
+#         ]
+
 class RecipeCreateSerializer(RecipeSerializer):
-    '''Serializer for create recipe.'''
+    """Serializer to work with Recipe create."""
     tags = PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
 
+    class Meta:
+        model = Recipe
+        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
+                  'is_in_shopping_cart', 'name', 'image', 'text',
+                  'cooking_time')
+        extra_kwargs = {
+            'cooking_time': {
+                'min_value': None,
+            },
+        }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Recipe.objects.all(),
+                fields=('author', 'name'),
+                message='Вы уже создавали рецепт с таким названием.'
+            )
+        ]
+
     @staticmethod
-    def _save_ingredients(recipe, ingredients):
+    def save_ingredients(recipe, ingredients):
         ingredients_list = []
         for ingredient in ingredients:
-            current_ingredient = ingredient.get('id')
-            current_amount = ingredient.get('amount')
+            current_ingredient = ingredient['ingredient']['id']
+            current_amount = ingredient['amount']
             ingredients_list.append(
                 IngredientRecipe(
                     recipe=recipe,
@@ -142,62 +237,44 @@ class RecipeCreateSerializer(RecipeSerializer):
     def validate(self, data):
         if data['cooking_time'] <= 0:
             raise ValidationError('Время приготовления не может '
-                                  'быть менее 1 минуты.')
+                                  'быть менее минуты.')
 
         ingredients_list = []
         for ingredient in data['recipe_ingredients']:
-            if ingredient.get('amount') <= 0:
-                raise ValidationError('Количество не может быть меньше 1.')
-            ingredients_list.append(ingredient.get('id'))
+            if ingredient['amount'] <= 0:
+                raise ValidationError('Количество не может'
+                                      ' быть меньше 1.')
+            ingredients_list.append(ingredient['ingredient']['id'])
 
         if len(ingredients_list) > len(set(ingredients_list)):
-            raise ValidationError('Ингредиенты должны быть уникальны.')
+            raise ValidationError('Ингредиенты не должны'
+                                  ' повторяться.')
         return data
 
-    @transaction.atomic
     def create(self, validated_data):
         author = self.context['request'].user
-        ingredients = validated_data.get('recipe_ingredients', [])
-        tags = validated_data.get('tags', [])
+        ingredients = validated_data.pop('recipe_ingredients')
+        tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data, author=author)
-        recipe.tags.set(tags)
+        recipe.tags.add(*tags)
         self.save_ingredients(recipe, ingredients)
         return recipe
 
-    @transaction.atomic
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
         instance.image = validated_data.get('image', instance.image)
         instance.cooking_time = validated_data.get(
             'cooking_time', instance.cooking_time)
-        ingredients = validated_data.get('recipe_ingredients', [])
-        tags = validated_data.get('tags', [])
+        ingredients = validated_data.pop('recipe_ingredients')
+        tags = validated_data.pop('tags')
         instance.tags.clear()
-        instance.tags.set(tags)
+        instance.tags.add(*tags)
         instance.ingredients.clear()
         recipe = instance
         self.save_ingredients(recipe, ingredients)
         instance.save()
         return instance
-
-    class Meta:
-        model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shopping_cart', 'name', 'image', 'text',
-                  'cooking_time')
-        extra_kwargs = {
-            'cooking_time': {
-                'min_value': 1,
-            },
-        }
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Recipe.objects.all(),
-                fields=('author', 'name'),
-                message='Название должно быть уникальным.'
-            )
-        ]
 
 
 class ShortRecipeSerializer(RecipeSerializer):
