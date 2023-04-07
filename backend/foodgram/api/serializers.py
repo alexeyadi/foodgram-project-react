@@ -130,8 +130,8 @@ class RecipeCreateSerializer(RecipeSerializer):
     def _save_ingredients(recipe, ingredients):
         ingredients_list = []
         for ingredient in ingredients:
-            current_ingredient = ingredient.get('id')
-            current_amount = ingredient.get('amount')
+            current_ingredient = ingredient['ingredient']['id']
+            current_amount = ingredient['amount']
             ingredients_list.append(
                 IngredientRecipe(
                     recipe=recipe,
@@ -142,16 +142,18 @@ class RecipeCreateSerializer(RecipeSerializer):
     def validate(self, data):
         if data['cooking_time'] <= 0:
             raise ValidationError('Время приготовления не может '
-                                  'быть менее 1 минуты.')
+                                              'быть менее минуты.')
 
         ingredients_list = []
         for ingredient in data['recipe_ingredients']:
-            if ingredient.get('amount') <= 0:
-                raise ValidationError('Количество не может быть меньше 1.')
-            ingredients_list.append(ingredient.get('id'))
+            if ingredient['amount'] <= 0:
+                raise ValidationError('Количество не может'
+                                                  ' быть меньше 1.')
+            ingredients_list.append(ingredient['ingredient']['id'])
 
         if len(ingredients_list) > len(set(ingredients_list)):
-            raise ValidationError('Ингредиенты должны быть уникальны.')
+            raise ValidationError('Ингредиенты не должны'
+                                              ' повторяться.')
         return data
 
     @transaction.atomic
